@@ -1,0 +1,60 @@
+// 1. Your custom variables and variable overwrites.
+
+$button-danger-background: rgb(237, 28, 38);
+$button-primary-background: rgb(75,181,67);
+$navbar-background: rgb(22,115,143);
+$offcanvas-bar-background: rgb(22,115,143);
+$global-medium-font-size: 1.25rem !default;
+
+$nav-parent-font-size: $global-medium-font-size !default;
+$nav-header-font-size: $global-medium-font-size !default;
+$nav-item-font-size: $global-medium-font-size !default;
+$inverse-nav-default-sublist-item-color:#ffffff;
+$inverse-nav-default-item-color:#ffffff;
+
+$table-header-cell-color: #000000;
+$table-header-cell-font-weight: bolder;
+$table-hover-row-background:rgba(22,115,143,0.1);
+
+.uk-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+#hamburguer {
+  color: rgb(255, 255, 255);
+}
+
+#menu-container a {
+  text-decoration: none;
+}
+
+#sidebar_logo {
+  text-align: center;
+}
+
+#custom-table-header th{
+ color: #ffffff !important;
+ text-align: center;
+ background: rgb(22,115,143);
+}
+
+.uk-table {
+  text-align: center;
+}
+
+// .uk-margin .uk-inline{
+//   display: block;
+// }
+
+
+
+// 2. Import default variables and available mixins.
+@import "../../uikit/src/scss/variables-theme.scss";
+@import "../../uikit/src/scss/mixins-theme.scss";
+
+// 3. Your custom mixin overwrites.
+
+
+// 4. Import UIkit.
+@import "../../uikit/src/scss/uikit-theme.scss";
