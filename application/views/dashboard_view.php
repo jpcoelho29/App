@@ -4,7 +4,7 @@
         <a href="#" type="button">
             <div class="uk-card uk-card-default uk-card-small uk-card-body uk-card-hover">
                 <h4 class="uk-card-title">Extrusão</h4>
-                <img data-src="<?php echo base_url('assets/img/extrusion.png')?>" width="100px" height="100px" uk-img>
+                <img src="<?php echo base_url('assets/uikit/custom/icons/factory.svg')?>" width="100px" height="100px" svg>
             </div>
         </a>
     </div>

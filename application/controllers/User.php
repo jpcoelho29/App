@@ -636,14 +636,12 @@ class User extends MY_Controller {
     $this->data['identity_column'] = $identity_column;
     
     // Validate form input
-    $this->form_validation->set_rules('username', 'username', 'trim|required|is_unique[' . $tables['users'] . '.' . $identity_column . ']');
-    $this->form_validation->set_rules('name', 'name', 'trim');
-    $this->form_validation->set_rules('email', 'email', 'trim|valid_email|');
-    $this->form_validation->set_rules('phone', 'phone', 'trim');
-    $this->form_validation->set_rules('password', 'password', 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[password_confirm]');
-    $this->form_validation->set_rules('password_confirm', 'password_confirm', 'required');
-
-    // is_unique[' . $tables['users'] . '.email]'
+    $this->form_validation->set_rules('username', 'Username', 'trim|required|is_unique[' . $tables['users'] . '.' . $identity_column . ']');
+    $this->form_validation->set_rules('name', 'Nome', 'trim');
+    $this->form_validation->set_rules('email', 'E-mail', 'trim|valid_email');
+    $this->form_validation->set_rules('phone', 'Telefone', 'trim');
+    $this->form_validation->set_rules('password', 'Password', 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[password_confirm]');
+    $this->form_validation->set_rules('password_confirm', 'Confirmar Password', 'required');
 
     if ($this->form_validation->run() === TRUE)
     {
@@ -679,13 +677,66 @@ class User extends MY_Controller {
     {
       $msg['success'] = TRUE;
       $msg['user'] = $user; 
-      $msg['is_member'] = FALSE;
-      
+            
       if($this->ion_auth->in_group('members', $user_id) || $this->ion_auth->is_admin($user_id))
       {
         $msg['is_member'] = TRUE;
       }
     }    
+    echo json_encode($msg);
+  }
+
+  public function updateUser()
+  {
+    if (!$this->ion_auth->logged_in())
+		{
+			redirect('login', 'refresh');
+    }
+    elseif (!$this->ion_auth->is_admin())
+    {
+      redirect('dashboard', 'refresh');
+    }
+
+    $this->load->model('Group_Model');
+
+    $msg['success'] = FALSE;
+    $user_id = $this->input->post('userId');
+   
+    $tables = $this->config->item('tables', 'ion_auth');
+		$identity_column = $this->config->item('identity', 'ion_auth');
+    $this->data['identity_column'] = $identity_column;
+
+    $this->form_validation->set_rules('name', 'Nome', 'trim|required');
+    $this->form_validation->set_rules('phone', 'Telefone', 'trim');
+    $this->form_validation->set_rules('email', 'Email', 'trim|valid_email');
+
+    if ($this->input->post('password'))
+    {
+      $this->form_validation->set_rules('password', 'Password', 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[password_confirm]');
+      $this->form_validation->set_rules('password_confirm', 'Confirmar Password', 'required');
+    }
+      
+    if ($this->form_validation->run() === TRUE)
+    {
+      $data = [
+        'name'  => $this->input->post('name'),
+        'phone' => $this->input->post('phone'),
+        'email' => $this->input->post('email'),
+      ];
+
+      if ($this->input->post('password'))
+      {
+        $data['password'] = $this->input->post('password');
+      }
+
+      if ($this->ion_auth->update($user_id, $data))
+      {
+        $msg['success'] = TRUE;
+      }
+
+    }else{
+      $msg['errors'] = validation_errors();      
+    }
     echo json_encode($msg);
   }
 

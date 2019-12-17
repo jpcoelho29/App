@@ -38,17 +38,19 @@
                 </div>
                 <form id="userForm" action="" method="POST" class="uk-form uk-form-horizontal">
                     <fieldset class="uk-fieldset">
-                        <div class="uk-margin">
+                        <div class="uk-margin" id="userType">
                             <label class="uk-form-label" for="group"><span uk-icon="icon: users"></span> Tipo de Utilizador</label>
                             <div class="uk-form-controls">
                                 <label>
                                     <input class="uk-radio" type="radio" name="group" id="radio1" value="members" checked> Utilizador
                                 </label>
+                                <br>
                                 <label>
                                     <input class="uk-radio" type="radio" name="group" id="radio2" value="work-center"> Centro Trabalho
                                 </label>
                             </div>
                         </div>
+                        <input type="hidden" id="userId" name="userId" value="0">
                         <div class="uk-margin">
                             <label class="uk-form-label" for="username"><span uk-icon="icon: user"></span> Username</label>
                             <div class="uk-form-controls">
@@ -133,24 +135,29 @@
                     $('#showData').html(html);
                 },
                 error: function(){
-                    alert('Error showing all users');
+                    alert('Não foi possível mostrar lista de utilizadores');
                 }
             });
         }
 
-        // Function to open create user modal
+        // Function to Set Create User Modal
         $('#btnAddUser').click(function(){
             UIkit.modal('#userModal').show();
             $('#userModal').find('.uk-modal-title').text('Criar novo utilizador');
             $('#userForm').attr('action', '<?php echo base_url() ?>user/addNewUser');
+            $('#username').prop('disabled', false);
+            $('#userType').show();
             $('#userForm')[0].reset();
         });
 
-        // Function to open Edit User modal
+        // Function to Set Edit User Modal
         $('#showData').on('click', '#btnEditUser', function(){
             var userId = $(this).attr('data');
             var url = '<?php echo base_url() ?>user/editUserData';
-
+            UIkit.modal('#userModal').show();
+            $('#userModal').find('.uk-modal-title').text('Editar utilizador');
+            $('#userForm').attr('action', '<?php echo base_url() ?>user/updateUser');
+            $('#userType').hide();
             $.ajax({
                 type: 'ajax',
                 method:'get',
@@ -158,40 +165,24 @@
                 data: {id: userId},
                 dataType: 'json',
                 success: function(data){
-                    if(data.success){
-                        var user = data.user[0];
-                        var is_member = data.is_member;
-                        if(! is_member ){
-                            $("#radio2").prop("checked", true)
-                        }
-                        else{
-                            $("#radio1").prop("checked", true)
-                        }
-                        $('#username').val(user['username']);
-                        $('#username').attr('disabled', 'disabled');
-                        $('#name').val(user['name']);
-                        $('#email').val(user['email']);
-                        $('#phone').val(user['phone']);
-                    }else{
-
-                    }
+                    var user = data.user[0];
+                    $('#userId').val(user['id']);
+                    $('#username').val(user['username']);
+                    $('#username').prop('disabled', true);
+                    $('#name').val(user['name']);
+                    $('#email').val(user['email']);
+                    $('#phone').val(user['phone']);
                 },
                 error: function(){
-                    alert('Erro');
+                    alert('Não foi possível obter dados do utilizador!');
                 }
             })
-
-            UIkit.modal('#userModal').show();
-            $('#userModal').find('.uk-modal-title').text('Editar utilizador');
-            $('#userForm').attr('action', '<?php echo base_url() ?>user/editUser');
-
-
         })
-        
         // Function to save new user OR update user data
-        $('#btnSaveUser').click(function(){
+        $('#userModal').on('click', '#btnSaveUser' ,function(){
             var url = $('#userForm').attr('action');
             var data = $('#userForm').serialize();
+            console.log(data);
             $.ajax({
                 type: 'ajax',
                 method: 'post',
@@ -209,11 +200,11 @@
                                     '<a class="uk-alert-close" uk-close></a>' +
                                     response.errors + 
                                 '</div>';
-                        $('#errorAlert').html(html).fadeIn('fast').delay(5000).fadeOut('400');
+                        $('#errorAlert').html(html).fadeIn('fast').delay(10000).fadeOut('slow');
                     }
                 },
                 error: function(){
-                    alert('Utilizador não foi criado!');
+                    alert('Os dados de utilizador não foram guardados!');
                 }
             })
         })
