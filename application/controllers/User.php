@@ -617,25 +617,76 @@ class User extends MY_Controller {
   public function addNewUser()
   {
 
-    $mgs['success'] = FALSE;  
+    if (!$this->ion_auth->logged_in())
+		{
+			redirect('login', 'refresh');
+    }
+    elseif (!$this->ion_auth->is_admin())
+    {
+      redirect('dashboard', 'refresh');
+    }
 
-    $username = $this->input->post('username');
-    $password = $this->input->post('password');
-    $email    = $this->input->post('email');
+    $this->load->model('Group_Model');
 
-    $data = [
-      'name'      => $this->input->post('name'),
-      'phone'     => $this->input->post('phone'),
-    ];
+    $msg['success'] = FALSE;
+    $group_id = [];  
+   
+    $tables = $this->config->item('tables', 'ion_auth');
+		$identity_column = $this->config->item('identity', 'ion_auth');
+    $this->data['identity_column'] = $identity_column;
+    
+    // Validate form input
+    $this->form_validation->set_rules('username', 'username', 'trim|required|is_unique[' . $tables['users'] . '.' . $identity_column . ']');
+    $this->form_validation->set_rules('name', 'name', 'trim');
+    $this->form_validation->set_rules('email', 'email', 'trim|valid_email|');
+    $this->form_validation->set_rules('phone', 'phone', 'trim');
+    $this->form_validation->set_rules('password', 'password', 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[password_confirm]');
+    $this->form_validation->set_rules('password_confirm', 'password_confirm', 'required');
 
-    $result = $this->ion_auth->register($username, $password, $email, $data);
+    // is_unique[' . $tables['users'] . '.email]'
 
-    if ($result)
+    if ($this->form_validation->run() === TRUE)
+    {
+      $username = $this->input->post('username');
+      $password = $this->input->post('password');
+      $email    = strtolower($this->input->post('email'));
+      $data = [
+        'name'      => $this->input->post('name'),
+        'phone'     => $this->input->post('phone'),
+      ];
+    }
+
+    array_push($group_id,$this->Group_Model->getGroupId($this->input->post('group')));
+
+    if ($this->form_validation->run() === TRUE && $this->ion_auth->register($username, $password, $email, $data, $group_id))
+		{
+      $msg['success'] = TRUE;
+    }
+    else
+    {
+      $msg['errors'] = validation_errors();
+    }
+    echo json_encode($msg);
+  }
+
+  public function editUserData()
+  {
+    $msg['success'] = FALSE;
+    $user_id = $this->input->get('id');
+    $user = $this->ion_auth->user($user_id)->result();
+
+    if($user)
     {
       $msg['success'] = TRUE;
-    } 
+      $msg['user'] = $user; 
+      $msg['is_member'] = FALSE;
+      
+      if($this->ion_auth->in_group('members', $user_id) || $this->ion_auth->is_admin($user_id))
+      {
+        $msg['is_member'] = TRUE;
+      }
+    }    
     echo json_encode($msg);
-    
   }
 
 }

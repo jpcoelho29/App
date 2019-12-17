@@ -26,10 +26,7 @@ class User_Model extends CI_Model
 
   public function addNewUser()
   {
-    
-
     $this->ion_auth->register($username, $password, $email, $data);
-
   }
 
 }
