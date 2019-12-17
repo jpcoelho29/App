@@ -96,7 +96,8 @@
 </div>
 
 <script>
-    $(function(){
+
+    $(document).ready(function(){
 
         showAllUsers();
 
@@ -221,7 +222,6 @@
         $('#showData').on('click', '#userStatus', function(){
             alert('Change User Status');
         })
-
     })
 
 </script>
