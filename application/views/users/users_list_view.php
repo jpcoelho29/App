@@ -97,10 +97,43 @@
                 </form>    
             </div>
             <div class="uk-modal-footer">
-                <button id="btnSaveUser" class="uk-button uk-button-primary uk-align-center" type="button"><span uk-icon="icon: add-user"></span> Adicionar</button>
+                <button id="btnSaveUser" class="uk-button uk-button-primary uk-align-center" type="button"><span uk-icon="icon: add-user"></span> Guardar</button>
             </div>
         </div>
     </div>
+
+    <div id="userGroupsModal" uk-modal>
+        <div class="uk-modal-dialog">
+            <button class="uk-modal-close-default" type="button" uk-close></button>
+            <div class="uk-modal-header">
+                <h3 class="uk-modal-title uk-text-capitalize uk-text-center">
+                Grupos de Utilizador
+                </h3>
+            </div>
+            <div class="uk-modal-body">
+                <form action="" method="POST" class="uk-form uk-form-horizontal">
+                    <fieldset class="uk-fieldset">
+                    <div class="uk-margin">
+                        <label class="uk-form-label" for='group'>
+                            <span uk-icon="icon: users"></span> Tipo de Utilizador
+                        </label>
+                        <div class="uk-form-controls">
+                            <select class="uk-select">
+                                <option value="admin" name="group">Admin</option>
+                                <option value="members" selected="select">Utilizador</option>
+                                <option value="work-center">Centro de Trabalho</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    </fieldset>
+                </form>
+            </div>        
+            <div class="uk-modal-footer">
+                <button id="btnSaveGroups" class="uk-button uk-button-primary uk-align-center" type="button"><span uk-icon="icon: save"></span> Guardar</button>
+            </div>
+        </div>
+    <div>
 </div>
 
 <script>
@@ -108,6 +141,8 @@
     $(document).ready(function(){
 
         showAllUsers();
+
+        UIkit.modal('#userGroupsModal').show();
 
         // Function to show all the users
         function showAllUsers(){
@@ -123,10 +158,10 @@
                         var userStatus;
                         if(data[i].active == 1)
                         {
-                            $userStatus = '<a class="uk-button uk-button-primary uk-button-small uk-text-bold" id="userStatus" data="' + data[i].id +'">Ativo</a>'         
+                            $userStatus = '<a class="uk-button uk-button-primary uk-button-small uk-text-bold" id="userStatus" data="' + data[i].id +'" uk-tooltip="Inativar Utilizador">Ativo</a>'         
                         }
                         else{
-                            $userStatus = '<a class="uk-button uk-button-danger uk-button-small uk-text-bold" id="userStatus" data="' + data[i].id +'"> Inativo</a>'
+                            $userStatus = '<a class="uk-button uk-button-danger uk-button-small uk-text-bold" id="userStatus" data="' + data[i].id +'" uk-tooltip="Ativar Utilizador">Inativo</a>'
                         }
                         html += '<tr>' +
                                     '<td>'+data[i].name+'</td>' +
@@ -135,7 +170,7 @@
                                     '<td>'+data[i].phone+'</td>' +
                                     '<td>'+data[i].id+'</td>' + 
                                     '<td>'+$userStatus+'</td>' + 
-                                    '<td><a class="uk-icon-button" uk-icon="pencil" id="btnEditUser" data="'+data[i].id+'"></a></td>' + 
+                                    '<td><a class="uk-icon-button" uk-icon="pencil" id="btnEditUser" data="'+data[i].id+'" uk-tooltip="Editar Utilizador"></a></td>' + 
                                 '</tr>';    
                     }
                     $('#showData').html(html);
@@ -232,11 +267,13 @@
                             button.removeClass('uk-button-danger');
                             button.addClass('uk-button-primary');
                             button.text('Ativo');
+                            button.attr('uk-tooltip', 'Inativar Utilizador');
                         }else{
                             // User has been deactivated
                             button.removeClass('uk-button-primary');
                             button.addClass('uk-button-danger');
                             button.text('Inativo');
+                            button.attr('uk-tooltip', 'Ativar Utilizador');
                         }
                     }else{
                         alert(response.error);
