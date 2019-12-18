@@ -5,11 +5,11 @@
 
         <div class="uk-overflow-auto">
 
-        <!-- uk-toggle="target: #newUserModal -->
+        <div>    
+            <a class="uk-button uk-button-small uk-button-default uk-button-danger" id="btnAddUser">Criar Utilizador</a>
+            <a class="uk-button uk-button-small uk-button-default uk-button-danger" href="<?php echo base_url('groups') ?>">Gerir Grupos</a>
+        </div>
 
-        <a class="uk-button uk-button-small uk-button-default uk-button-danger" id="btnAddUser">Criar Utilizador</a>
-        <a class="uk-button uk-button-small uk-button-default uk-button-danger" href="<?php echo base_url('groups') ?>">Gerir Grupos</a>
-        
         <table class="uk-table uk-table-striped uk-table-small uk-table-middle">
             <tr id="custom-table-header">
                 <th>Nome</th>
@@ -39,10 +39,16 @@
                 <form id="userForm" action="" method="POST" class="uk-form uk-form-horizontal">
                     <fieldset class="uk-fieldset">
                         <div class="uk-margin" id="userType">
-                            <label class="uk-form-label" for="group"><span uk-icon="icon: users"></span> Tipo de Utilizador</label>
+                            <label class="uk-form-label" for="group">
+                                <span uk-icon="icon: users"></span> Tipo de Utilizador
+                            </label>
                             <div class="uk-form-controls">
                                 <label>
-                                    <input class="uk-radio" type="radio" name="group" id="radio1" value="members" checked> Utilizador
+                                    <input class="uk-radio" type="radio" name="group" id="radio1" value="admin"> Admin
+                                </label>
+                                <br>
+                                <label>
+                                    <input class="uk-radio" type="radio" name="group" id="radio2" value="members" checked> Utilizador
                                 </label>
                                 <br>
                                 <label>
@@ -117,10 +123,10 @@
                         var userStatus;
                         if(data[i].active == 1)
                         {
-                            $userStatus = '<span class="uk-label uk-label-success" id="userStatus" data="' + data[i].id +'">Ativo</span>'         
+                            $userStatus = '<a class="uk-button uk-button-primary uk-button-small uk-text-bold" id="userStatus" data="' + data[i].id +'">Ativo</a>'         
                         }
                         else{
-                            $userStatus = '<span class="uk-label uk-label-danger" id="userStatus" data="' + data[i].id +'"> Inativo</span>'
+                            $userStatus = '<a class="uk-button uk-button-danger uk-button-small uk-text-bold" id="userStatus" data="' + data[i].id +'"> Inativo</a>'
                         }
                         html += '<tr>' +
                                     '<td>'+data[i].name+'</td>' +
@@ -182,7 +188,6 @@
         $('#userModal').on('click', '#btnSaveUser' ,function(){
             var url = $('#userForm').attr('action');
             var data = $('#userForm').serialize();
-            console.log(data);
             $.ajax({
                 type: 'ajax',
                 method: 'post',
@@ -211,8 +216,39 @@
 
         // Function to change user status
         $('#showData').on('click', '#userStatus', function(){
-            alert('Change User Status');
+            var button = $(this);
+            var userId = button.attr('data');
+            var url = '<?php echo base_url() ?>user/editUserStatus';
+            $.ajax({
+                type: 'ajax',
+                method: 'post',
+                url: url,
+                data: {id: userId},
+                dataType: 'json',
+                success: function(response){
+                    if(response.success){
+                        if(response.status){
+                            // User has ben activated
+                            button.removeClass('uk-button-danger');
+                            button.addClass('uk-button-primary');
+                            button.text('Ativo');
+                        }else{
+                            // User has been deactivated
+                            button.removeClass('uk-button-primary');
+                            button.addClass('uk-button-danger');
+                            button.text('Inativo');
+                        }
+                    }else{
+                        alert(response.error);
+                    }
+                },
+                error: function(){
+                    alert('Não foi possível alterar o estado do utilizador!')
+                }
+            })
+            
         })
+
     })
 
 </script>
