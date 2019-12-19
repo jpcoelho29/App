@@ -122,7 +122,7 @@ class User extends MY_Controller {
     }
 
     array_push($group_id,$this->Group_Model->getGroupId($this->input->post('group')));
-
+    
     if ($this->form_validation->run() === TRUE && $this->ion_auth->register($username, $password, $email, $data, $group_id))
 		{
       $msg['success'] = TRUE;
@@ -271,11 +271,20 @@ class User extends MY_Controller {
     $user_id            = $this->input->get('id');
     $user_groups        = $this->ion_auth->get_users_groups($user_id)->result();
     $group_permissions  = $this->Group_Model->getGroupPermission();
-   
-    if($user_groups && $group_permissions){
+    $user_types         = $this->Group_Model->getUserTypes();
+
+    foreach($user_types as $type):
+      if($this->ion_auth->in_group($type->name, $user_id)){
+        $user_type = $type;
+      }
+    endforeach;
+  
+    if($group_permissions){
       $msg['success']           = TRUE;
       $msg['group_permissions'] = $group_permissions;
-      $msg['user_groups']       = $user_groups;  
+      $msg['user_groups']       = $user_groups; 
+      $msg['user_types']        = $user_types;
+      $msg['user_type']         = $user_type; 
     }    
     
     echo json_encode($msg);

@@ -24,8 +24,18 @@ class Group_Model extends CI_Model
     }
   }
 
-  public function getUserType(){
-    $sql = 'SELECT * FROM groups WHERE user_id = "'. $user_id .'"':
+  public function getUserTypes(){
+    $sql = 'SELECT DISTINCT name FROM groups WHERE description = "Tipo de Utilizador"';
+    $query  = $this->db->query($sql);
+    $result = $query->result();
+
+    if($query->num_rows() >0)
+    {
+      return $result;
+    }
+    else{
+      return false;
+    }
   }
 
   public function getGroupPermission(){
@@ -40,7 +50,6 @@ class Group_Model extends CI_Model
     else{
       return false;
     } 
-    
   }
 
 }  

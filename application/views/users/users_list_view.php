@@ -43,9 +43,9 @@
                                 <span uk-icon="icon: users"></span> Tipo de Utilizador
                             </label>
                             <div class="uk-margin uk-form-controls">
-                                <select class="uk-select" id="group">
+                                <select class="uk-select" id="group" name="group">
                                     <option value="admin">Administrador</option>
-                                    <option value="members">Utilizador</option>
+                                    <option selected value="members">Utilizador</option>
                                     <option value="work-center">Centro de Trabalho</option>
                                 </select>
                             </div>
@@ -108,19 +108,17 @@
                 <form action="" method="POST" class="uk-form uk-form-horizontal">
                     <fieldset class="uk-fieldset">
                     
-                    <div class="uk-margin">
-                        <label class="uk-form-label" for='group'>
-                            <span uk-icon="icon: users"></span> Tipo de Utilizador
-                        </label>
-                        <div class="uk-margin uk-form-controls">
-                            <select class="uk-select">
-                                <option>Option 01</option>
-                                <option>Option 02</option>
-                            </select>
+                        <div class="uk-margin-small">
+                            <label class="uk-form-label" for='group'>
+                                <span uk-icon="icon: users"></span> Tipo de Utilizador
+                            </label>
+                            <div class="uk-margin-small uk-form-controls">
+                                <div id="userTypeSection"> 
+                                </div>
+                            </div>
                         </div>
-                    </div>
-
-                    <div id="test">
+                    <hr>
+                    <div id="permissionsSection">
                     </div>
 
                     </fieldset>
@@ -247,7 +245,7 @@
         // Function to change user status
         $('#showData').on('click', '#userStatus', function(){
             var btn = $(this);
-            var userId = button.attr('data');
+            var userId = btn.attr('data');
             var url = '<?php echo base_url() ?>user/editUserStatus';
             $.ajax({
                 type: 'ajax',
@@ -284,7 +282,6 @@
         // Function to edit user groups
         $('#showData').on('click', '#btnUserGroups', function(){
             UIkit.modal('#userGroupsModal').show();
-            $('#userGroupsModal').attr('action', '<?php echo base_url() ?>user/updateUserGroups');
             var btn = $(this);
             var url = '<?php base_url() ?>user/userGroups';
             var user_id = btn.attr('data');
@@ -298,23 +295,49 @@
                     if(response.success){
                         var permissions = response.group_permissions;
                         var user_groups = response.user_groups;
+                        var user_types = response.user_types;
+                        var user_type = response.user_type;
                         var i;
                         var k;
-                        var html = '';
+                        var html = '<select class="uk-select">';
+                        var selected;
+
+                        for(i=0; i<user_types.length; i++){
+
+                            if(user_types[i]['name'] == user_type['name']){
+                                selected = 'selected';
+                            }else{
+                                selected = '';
+                            }
+                            
+                            html += '<option ' +
+                                    'value="' + user_types[i]['name'] + '"' +
+                                    selected +
+                                    '>' +
+                                        user_types[i]['name'] +
+                                    '</option>';    
+                        }      
+                        
+                        html += '<select>';
+
+                        $('#userTypeSection').html(html);
+                        
+                        html = '';
 
                         for(i=0; i<permissions.length; i++){
 
-                            html +=   '<div class="uk-margin">' +
-                                        '<label class="uk-form-label" for="'+ permissions[i]['description'] +'">'+permissions[i]['description'] +
-                                        '</label>'+
-                                        '<div class="uk-margin uk-form-controls">'+
-                                            '<input class="uk-checkbox" type="checkbox">' +
-                                            '<input class="uk-checkbox" type="checkbox">' +
-                                            '<input class="uk-checkbox" type="checkbox">' +
+                            html += '<div class="uk-margin-small">' +
+                                        '<label class="uk-form-label uk-text-bold" for="'+ permissions[i]['description'] +'">'+permissions[i]['description'] +
+                                        ':</label>'+
+                                        '<div class="uk-margin-small uk-kit-grid-small uk-child-width-auto uk-grid">'+
+                                            '<label><input class="uk-checkbox" type="checkbox" checked> Ver</label>' +
+                                            '<label><input class="uk-checkbox" type="checkbox"> Escrever</label>' +
+                                            '<label><input class="uk-checkbox" type="checkbox"> Editar</label>' +
                                         '</div>' +
-                                    '</div>';
+                                    '</div>' +
+                                    '<hr>';
 
-                           $('#test').html(html);        
+                           $('#permissionsSection').html(html);        
                             
                         }
                     }
@@ -323,6 +346,10 @@
                     alert('Could not get user groups');
                 }
             }) 
+        })
+
+        $('#btnSaveGroups').click(function(){
+            alert('click');
         })
 
     })
