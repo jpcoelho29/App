@@ -249,9 +249,35 @@ class User extends MY_Controller {
           $msg['status']  = TRUE;
         }
       }
+    }
+    echo json_encode($msg);
+  }
 
+  public function userGroups(){
+
+    $this->load->model('Group_Model');
+    
+    $msg['success'] = FALSE;
+
+    if (!$this->ion_auth->logged_in())
+		{
+			redirect('login', 'refresh');
+    }
+    elseif (!$this->ion_auth->is_admin())
+    {
+      redirect('dashboard', 'refresh');
     }
 
+    $user_id            = $this->input->get('id');
+    $user_groups        = $this->ion_auth->get_users_groups($user_id)->result();
+    $group_permissions  = $this->Group_Model->getGroupPermission();
+   
+    if($user_groups && $group_permissions){
+      $msg['success']           = TRUE;
+      $msg['group_permissions'] = $group_permissions;
+      $msg['user_groups']       = $user_groups;  
+    }    
+    
     echo json_encode($msg);
 
   }

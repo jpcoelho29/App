@@ -7,7 +7,7 @@
 
         <div>    
             <a class="uk-button uk-button-small uk-button-default uk-button-danger" id="btnAddUser">Criar Utilizador</a>
-            <a class="uk-button uk-button-small uk-button-default uk-button-danger" href="<?php echo base_url('groups') ?>">Gerir Grupos</a>
+            <a class="uk-button uk-button-small uk-button-default uk-button-danger" href="#">Gerir Grupos</a>
         </div>
 
         <table class="uk-table uk-table-striped uk-table-small uk-table-middle">
@@ -42,18 +42,12 @@
                             <label class="uk-form-label" for="group">
                                 <span uk-icon="icon: users"></span> Tipo de Utilizador
                             </label>
-                            <div class="uk-form-controls">
-                                <label>
-                                    <input class="uk-radio" type="radio" name="group" id="radio1" value="admin"> Admin
-                                </label>
-                                <br>
-                                <label>
-                                    <input class="uk-radio" type="radio" name="group" id="radio2" value="members" checked> Utilizador
-                                </label>
-                                <br>
-                                <label>
-                                    <input class="uk-radio" type="radio" name="group" id="radio2" value="work-center"> Centro Trabalho
-                                </label>
+                            <div class="uk-margin uk-form-controls">
+                                <select class="uk-select" id="group">
+                                    <option value="admin">Administrador</option>
+                                    <option value="members">Utilizador</option>
+                                    <option value="work-center">Centro de Trabalho</option>
+                                </select>
                             </div>
                         </div>
                         <input type="hidden" id="userId" name="userId" value="0">
@@ -107,23 +101,26 @@
             <button class="uk-modal-close-default" type="button" uk-close></button>
             <div class="uk-modal-header">
                 <h3 class="uk-modal-title uk-text-capitalize uk-text-center">
-                Grupos de Utilizador
+                Permissões do Utilizador
                 </h3>
             </div>
             <div class="uk-modal-body">
                 <form action="" method="POST" class="uk-form uk-form-horizontal">
                     <fieldset class="uk-fieldset">
+                    
                     <div class="uk-margin">
                         <label class="uk-form-label" for='group'>
                             <span uk-icon="icon: users"></span> Tipo de Utilizador
                         </label>
-                        <div class="uk-form-controls">
+                        <div class="uk-margin uk-form-controls">
                             <select class="uk-select">
-                                <option value="admin" name="group">Admin</option>
-                                <option value="members" selected="select">Utilizador</option>
-                                <option value="work-center">Centro de Trabalho</option>
+                                <option>Option 01</option>
+                                <option>Option 02</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div id="test">
                     </div>
 
                     </fieldset>
@@ -141,9 +138,7 @@
     $(document).ready(function(){
 
         showAllUsers();
-
-        UIkit.modal('#userGroupsModal').show();
-
+        
         // Function to show all the users
         function showAllUsers(){
             $.ajax({
@@ -168,7 +163,7 @@
                                     '<td>'+data[i].username+'</td>' +
                                     '<td>'+data[i].email+'</td>' +
                                     '<td>'+data[i].phone+'</td>' +
-                                    '<td>'+data[i].id+'</td>' + 
+                                    '<td><a class="uk-icon-button" uk-icon="users" id="btnUserGroups" data="'+data[i].id+'" uk-tooltip="Editar Permissões"></a></td>' + 
                                     '<td>'+$userStatus+'</td>' + 
                                     '<td><a class="uk-icon-button" uk-icon="pencil" id="btnEditUser" data="'+data[i].id+'" uk-tooltip="Editar Utilizador"></a></td>' + 
                                 '</tr>';    
@@ -251,7 +246,7 @@
 
         // Function to change user status
         $('#showData').on('click', '#userStatus', function(){
-            var button = $(this);
+            var btn = $(this);
             var userId = button.attr('data');
             var url = '<?php echo base_url() ?>user/editUserStatus';
             $.ajax({
@@ -264,16 +259,16 @@
                     if(response.success){
                         if(response.status){
                             // User has ben activated
-                            button.removeClass('uk-button-danger');
-                            button.addClass('uk-button-primary');
-                            button.text('Ativo');
-                            button.attr('uk-tooltip', 'Inativar Utilizador');
+                            btn.removeClass('uk-button-danger');
+                            btn.addClass('uk-button-primary');
+                            btn.text('Ativo');
+                            btn.attr('uk-tooltip', 'Inativar Utilizador');
                         }else{
                             // User has been deactivated
-                            button.removeClass('uk-button-primary');
-                            button.addClass('uk-button-danger');
-                            button.text('Inativo');
-                            button.attr('uk-tooltip', 'Ativar Utilizador');
+                            btn.removeClass('uk-button-primary');
+                            btn.addClass('uk-button-danger');
+                            btn.text('Inativo');
+                            btn.attr('uk-tooltip', 'Ativar Utilizador');
                         }
                     }else{
                         alert(response.error);
@@ -284,6 +279,50 @@
                 }
             })
             
+        })
+
+        // Function to edit user groups
+        $('#showData').on('click', '#btnUserGroups', function(){
+            UIkit.modal('#userGroupsModal').show();
+            $('#userGroupsModal').attr('action', '<?php echo base_url() ?>user/updateUserGroups');
+            var btn = $(this);
+            var url = '<?php base_url() ?>user/userGroups';
+            var user_id = btn.attr('data');
+            $.ajax({
+                type: 'ajax',
+                method: 'get',
+                url: url,
+                data: {id: user_id},
+                dataType: 'json',
+                success: function(response){
+                    if(response.success){
+                        var permissions = response.group_permissions;
+                        var user_groups = response.user_groups;
+                        var i;
+                        var k;
+                        var html = '';
+
+                        for(i=0; i<permissions.length; i++){
+
+                            html +=   '<div class="uk-margin">' +
+                                        '<label class="uk-form-label" for="'+ permissions[i]['description'] +'">'+permissions[i]['description'] +
+                                        '</label>'+
+                                        '<div class="uk-margin uk-form-controls">'+
+                                            '<input class="uk-checkbox" type="checkbox">' +
+                                            '<input class="uk-checkbox" type="checkbox">' +
+                                            '<input class="uk-checkbox" type="checkbox">' +
+                                        '</div>' +
+                                    '</div>';
+
+                           $('#test').html(html);        
+                            
+                        }
+                    }
+                },
+                error: function(){
+                    alert('Could not get user groups');
+                }
+            }) 
         })
 
     })
