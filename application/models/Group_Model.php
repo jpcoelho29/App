@@ -11,13 +11,37 @@ class Group_Model extends CI_Model
 
   public function getGroupId($group_name)
   {
-    $sql = 'SELECT id FROM groups WHERE name="' . $group_name . '"';
+
+    if(is_array($group_name)){
+      
+      $string = '';
+      
+      for($i = 0; $i<count($group_name); $i++){
+        $string .= '"';
+        $string .= $group_name[$i];
+        $string .= '" OR name=';
+      }
+      
+      $string = substr_replace($string, '', -9);
+
+      $sql = 'SELECT id FROM groups WHERE name=' . $string;
+
+    }
+    else
+    {
+      $sql = 'SELECT id FROM groups WHERE name="' . $group_name . '"';
+    }
+
     $query  = $this->db->query($sql);
     $result = $query->result();
     
-    if($query->num_rows() >0)
+    if($query->num_rows() == 1)
     {
       return $result[0]->id;
+    }
+    elseif($query->num_rows() > 1)
+    {
+      return $result;
     }
     else{
       return false;

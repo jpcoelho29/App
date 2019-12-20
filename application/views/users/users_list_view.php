@@ -1,4 +1,5 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');?>
+
 <div class="container">
     
     <div class="uk-container uk-container-expand">
@@ -105,9 +106,11 @@
                 </h3>
             </div>
             <div class="uk-modal-body">
-                <form action="" method="POST" class="uk-form uk-form-horizontal">
+                <form id="userGroupsForm" action="" method="POST" class="uk-form uk-form-horizontal">
                     <fieldset class="uk-fieldset">
-                    
+
+                        <input type="hidden" name="user_id" value="" id="user_id"></input>
+
                         <div class="uk-margin-small">
                             <label class="uk-form-label" for='group'>
                                 <span uk-icon="icon: users"></span> Tipo de Utilizador
@@ -281,8 +284,8 @@
 
         // Function to edit user groups
         $('#showData').on('click', '#btnUserGroups', function(){
-            UIkit.modal('#userGroupsModal').show();
             var btn = $(this);
+            $('#userForm').attr('action', '<?php echo base_url() ?>user/updateUserGroups');
             var url = '<?php base_url() ?>user/userGroups';
             var user_id = btn.attr('data');
             $.ajax({
@@ -299,8 +302,17 @@
                         var user_type = response.user_type;
                         var i;
                         var k;
-                        var html = '<select class="uk-select">';
+                        var html = '<select class="uk-select" name="group[]">';
                         var selected;
+                        var checked;
+                        var actions = [['view','Ver'], ['write','Escrever'], ['edit','Editar']]
+                        var in_groups = [];
+
+                        $('#user_id').attr('value', user_id);
+
+                        for(i=0; i<user_groups.length; i++){
+                            in_groups.push(user_groups[i]['name']);
+                        }
 
                         for(i=0; i<user_types.length; i++){
 
@@ -318,7 +330,7 @@
                                     '</option>';    
                         }      
                         
-                        html += '<select>';
+                        html += '</select name>';
 
                         $('#userTypeSection').html(html);
                         
@@ -329,16 +341,37 @@
                             html += '<div class="uk-margin-small">' +
                                         '<label class="uk-form-label uk-text-bold" for="'+ permissions[i]['description'] +'">'+permissions[i]['description'] +
                                         ':</label>'+
-                                        '<div class="uk-margin-small uk-kit-grid-small uk-child-width-auto uk-grid">'+
-                                            '<label><input class="uk-checkbox" type="checkbox" checked> Ver</label>' +
-                                            '<label><input class="uk-checkbox" type="checkbox"> Escrever</label>' +
-                                            '<label><input class="uk-checkbox" type="checkbox"> Editar</label>' +
-                                        '</div>' +
+                                        '<div class="uk-margin-small uk-kit-grid-small uk-child-width-auto uk-grid">';
+
+                                            for(k=0; k<actions.length; k++){
+
+                                                group_to_check = permissions[i]['description'].toLowerCase() + '_' + actions[k][0];
+                                                
+                                                if(in_groups.includes(group_to_check)){
+                                                    checked = 'checked';    
+                                                }
+                                                else{
+                                                    checked = '';
+                                                }
+                                                
+                                                html +='<label>' +
+                                                        '<input name="group[]" class="uk-checkbox" ' + 'type="checkbox" ' + 
+                                                        checked +
+                                                        ' value="' +
+                                                        group_to_check +
+                                                        '"> ' + 
+                                                        actions[k][1] +
+                                                        '</label>';
+                                            }
+                                                                                                               
+                            html+=      '</div>' +
                                     '</div>' +
                                     '<hr>';
 
                            $('#permissionsSection').html(html);        
-                            
+
+                           UIkit.modal('#userGroupsModal').show();
+
                         }
                     }
                 },
@@ -349,7 +382,21 @@
         })
 
         $('#btnSaveGroups').click(function(){
-            alert('click');
+            url     = $('#userForm').attr('action');
+            data    = $('#userGroupsForm').serialize()
+            $.ajax({
+                type: 'ajax',
+                method: 'post',
+                url: url,
+                data: data,
+                dataType: 'json',
+                success: function(response){
+                    console.log(response);
+                },
+                error: function(){
+                    alert("Couldn't update user groups")
+                }
+            })
         })
 
     })

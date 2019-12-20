@@ -43,9 +43,10 @@ $table-hover-row-background:rgba(22,115,143,0.1);
   text-align: center;
 }
 
-// .uk-margin .uk-inline{
-//   display: block;
-// }
+select option {
+  text-transform: capitalize;
+}
+
 
 
 
