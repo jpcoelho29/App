@@ -39,18 +39,17 @@
                 </div>
                 <form id="userForm" action="" method="POST" class="uk-form uk-form-horizontal">
                     <fieldset class="uk-fieldset">
-                        <div class="uk-margin" id="userType">
-                            <label class="uk-form-label" for="group">
+                    <div class="uk-margin-small">
+                        <div id="userTypeSection">
+                            <label class="uk-form-label" for='group'>
                                 <span uk-icon="icon: users"></span> Tipo de Utilizador
                             </label>
-                            <div class="uk-margin uk-form-controls">
-                                <select class="uk-select" id="group" name="group">
-                                    <option value="admin">Administrador</option>
-                                    <option selected value="members">Utilizador</option>
-                                    <option value="work-center">Centro de Trabalho</option>
-                                </select>
+                            <div class="uk-margin-small uk-form-controls">
+                                <div class="userTypeSection"> 
+                                </div>    
                             </div>
-                        </div>
+                        </div>   
+                    </div>
                         <input type="hidden" id="userId" name="userId" value="0">
                         <div class="uk-margin">
                             <label class="uk-form-label" for="username"><span uk-icon="icon: user"></span> Username</label>
@@ -116,7 +115,7 @@
                                 <span uk-icon="icon: users"></span> Tipo de Utilizador
                             </label>
                             <div class="uk-margin-small uk-form-controls">
-                                <div id="userTypeSection"> 
+                                <div class="userTypeSection"> 
                                 </div>
                             </div>
                         </div>
@@ -179,12 +178,37 @@
 
         // Function to Set Create User Modal
         $('#btnAddUser').click(function(){
+            url = '<?php base_url() ?>user/getUserTypes';
+            $.ajax({
+                type: 'ajax',
+                method: 'get',
+                url: url,
+                dataType: 'json',
+                success: function(response){
+                    var user_types = response.user_types;
+                    var html = '<select class="uk-select" name="group[]">';
+                    for(i=0; i<user_types.length; i++){
+                        html += '<option ' +
+                                'value="' + user_types[i]['name'] + '"' +
+                                '>' +
+                                user_types[i]['name'] +
+                                '</option>';    
+                        }      
+                        html += '</select name>';
+                        $('.userTypeSection').html(html); 
+                },
+                error: function(){
+                    alert('Couldnt get user types');
+                }
+            })         
             UIkit.modal('#userModal').show();
             $('#userModal').find('.uk-modal-title').text('Criar novo utilizador');
             $('#userForm').attr('action', '<?php echo base_url() ?>user/addNewUser');
             $('#username').prop('disabled', false);
             $('#userType').show();
-            $('#userForm')[0].reset();
+            $('#userForm')[0].reset();           
+            
+            
         });
 
         // Function to Set Edit User Modal
@@ -194,7 +218,7 @@
             UIkit.modal('#userModal').show();
             $('#userModal').find('.uk-modal-title').text('Editar utilizador');
             $('#userForm').attr('action', '<?php echo base_url() ?>user/updateUser');
-            $('#userType').hide();
+            $('#userTypeSection').hide();
             $.ajax({
                 type: 'ajax',
                 method:'get',
@@ -316,7 +340,7 @@
 
                         for(i=0; i<user_types.length; i++){
 
-                            if(user_types[i]['name'] == user_type['name']){
+                            if(user_types[i]['name'] == user_type){
                                 selected = 'selected';
                             }else{
                                 selected = '';
@@ -326,13 +350,13 @@
                                     'value="' + user_types[i]['name'] + '"' +
                                     selected +
                                     '>' +
-                                        user_types[i]['name'] +
+                                    user_types[i]['name'] +
                                     '</option>';    
                         }      
                         
                         html += '</select name>';
 
-                        $('#userTypeSection').html(html);
+                        $('.userTypeSection').html(html);
                         
                         html = '';
 
@@ -391,6 +415,7 @@
                 data: data,
                 dataType: 'json',
                 success: function(response){
+                    UIkit.modal('#userGroupsModal').hide();
                     console.log(response);
                 },
                 error: function(){

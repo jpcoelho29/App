@@ -41,7 +41,11 @@ class Group_Model extends CI_Model
     }
     elseif($query->num_rows() > 1)
     {
-      return $result;
+      $group_id = [];
+      foreach($query->result_array() as $row):
+        array_push($group_id, $row['id']);
+      endforeach;
+      return $group_id;  
     }
     else{
       return false;

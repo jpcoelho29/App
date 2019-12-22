@@ -275,7 +275,7 @@ class User extends MY_Controller {
 
     foreach($user_types as $type):
       if($this->ion_auth->in_group($type->name, $user_id)){
-        $user_type = $type;
+        $user_type = $type->name;
       }
     endforeach;
   
@@ -293,6 +293,15 @@ class User extends MY_Controller {
 
   public function updateUserGroups()
   {
+    if (!$this->ion_auth->logged_in())
+		{
+			redirect('login', 'refresh');
+    }
+    elseif (!$this->ion_auth->is_admin())
+    {
+      redirect('dashboard', 'refresh');
+    }
+
     $this->load->model('Group_Model');
     
     $msg['success'] = FALSE;
@@ -307,16 +316,6 @@ class User extends MY_Controller {
     endforeach;
     $groups_add = [];
     $groups_remove = [];
-
-    if (!$this->ion_auth->logged_in())
-		{
-			redirect('login', 'refresh');
-    }
-    elseif (!$this->ion_auth->is_admin())
-    {
-      redirect('dashboard', 'refresh');
-    }
-        
     $post_groups = $this->input->post('group');
 
     foreach($post_groups as $group):
@@ -324,7 +323,6 @@ class User extends MY_Controller {
       {
         array_push($groups_add, $group);
       }
-      $user_new_groups = array_merge($current_groups, $groups_add);
     endforeach;
 
     foreach($all_groups as $group):
@@ -334,21 +332,32 @@ class User extends MY_Controller {
       }
     endforeach;
 
-    if(count($groups_remove)>0){
-      $groups_id_remove = $this->Group_Model->getGroupId($groups_remove);
-      $groups_id_remove = (array) $groups_id_remove;
-    }
     if(count($groups_add)>0){
       $groups_id_add = $this->Group_Model->getGroupId($groups_add);
-      $groups_id_add = (array) $groups_id_add;
+      if($this->ion_auth->add_to_group($groups_id_add, $user_id)){
+        $msg['add'] = $groups_id_add;
+        $msg['success'] = TRUE;
+      }
     }
-
-    if($this->ion_auth->remove_from_group($groups_id_remove, $user_id)){
-      $msg['success'] = TRUE;
+    if(count($groups_remove)>0){
+      $groups_id_remove = $this->Group_Model->getGroupId($groups_remove);
+      if($this->ion_auth->remove_from_group($groups_id_remove, $user_id)){
+        $msg['remove'] = $groups_id_remove;
+        $msg['success'] = TRUE;
+      }
     }
-
     echo json_encode($msg);
-    
+  }
+
+  public function getUserTypes(){
+    $msg['success'] = false;
+    $this->load->model('Group_Model');
+    $result = $this->Group_Model->getUserTypes();
+    if($this->Group_Model->getUserTypes()){
+      $msg['success'] = TRUE;
+      $msg['user_types'] = $result;
+    }
+    echo json_encode($msg);    
   }
 
 }
